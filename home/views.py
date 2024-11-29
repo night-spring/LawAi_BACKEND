@@ -161,6 +161,7 @@ def data(request):
 
     #print(section_detail)
 
+    
     return HttpResponse(f"i am a chill guy!\n\t Added -> {section_no} - {section_title}")'''
     data = BNS.objects.values()
     data_list = list(data)
