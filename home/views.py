@@ -22,6 +22,7 @@ def ai(request):
             # Get the query from the request
             data = json.loads(request.body)
             query = data['query']
+            test = query  # Use the query from the request body
 
             # Generate response using the query
             API_KEY = os.getenv("API_KEY")
@@ -29,14 +30,24 @@ def ai(request):
                 raise ValueError("API_KEY is not set. Please set it in your .env file.")
             genai.configure(api_key=API_KEY)
             model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content(query)
+            response = model.generate_content(test)
 
-            # Add query and response to database
-            Query.objects.create(query=query, response=response.text)
-            return JsonResponse({"response": response.text})
+            # Log the entire response to inspect its structure
+            print("API Response:", response)  # Debugging: Check the response structure
+
+            # Assuming the response is a dictionary, adjust this based on the actual structure
+            # If 'response' is a dictionary, get the content from the appropriate key
+            response_text = response.get('content', 'No content in response')
+
+            # Add query and response to database (Optional, based on your model)
+            # Query.objects.create(query=query, response=response_text)
+
+            return JsonResponse({"response": response_text})
         except Exception as e:
+            # Catching errors and returning them as a response
+            print("Error occurred:", str(e))  # Log the error for debugging
             return JsonResponse({"error": str(e)})
-    else:  
+    else:
         return JsonResponse({"error": "Invalid Request Method"})
 
 def search_database(request):
