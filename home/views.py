@@ -3,11 +3,12 @@ import os
 from dotenv import load_dotenv
 import google.generativeai as genai
 from django.http import JsonResponse
-from .models import Query, BNS, IPC, CrPC, MVA, CPC, IEA
+from .models import Query, BNS, IPC, CrPC, MVA, CPC, IEA, Document
 from home.webscrap import WebScrapping
 import json
 import re
 import csv
+from django.views.decorators.csrf import csrf_exempt
 
 
 load_dotenv()
@@ -16,147 +17,86 @@ load_dotenv()
 def home(request):
     return HttpResponse("Hello Developer...")
 
+ACT_MODELS = {
+    "bns": BNS,
+    "ipc": IPC,
+    "crpc": CrPC,
+    "iea": IEA,
+    "cpc": CPC,
+    "mva": MVA,
+}
+@csrf_exempt
 def ai(request):
     if request.method == 'POST':
         try:
             # Get the query from the request
             data = json.loads(request.body)
             query = data['query']
-            test = query  # Use the query from the request body
-
+            prompt = os.getenv('prompt')
+            text = f"{query}. {prompt}"
             # Generate response using the query
             API_KEY = os.getenv("API_KEY")
             if not API_KEY:
                 raise ValueError("API_KEY is not set. Please set it in your .env file.")
             genai.configure(api_key=API_KEY)
             model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content(test)
-
-            # Log the entire response to inspect its structure
-            print("API Response:", response)  # Debugging: Check the response structure
-
-            # Assuming the response is a dictionary, adjust this based on the actual structure
-            # If 'response' is a dictionary, get the content from the appropriate key
-            response_text = response.get('content', 'No content in response')
+            response = model.generate_content(text)
 
             # Add query and response to database (Optional, based on your model)
             # Query.objects.create(query=query, response=response_text)
 
-            return JsonResponse({"response": response_text})
+            return JsonResponse({"response": response.text})
         except Exception as e:
-            # Catching errors and returning them as a response
-            print("Error occurred:", str(e))  # Log the error for debugging
             return JsonResponse({"error": str(e)})
     else:
         return JsonResponse({"error": "Invalid Request Method"})
 
+
+@csrf_exempt  # Remove this for production, use proper CSRF handling
 def search_database(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        act = data.get("act")
-        if not act:
-            return JsonResponse({"error": "Act is not selected"})
-        query = data.get("query")
-        if not query:
-            return JsonResponse({"error": "None"})
+        try:
+            data = json.loads(request.body)
+            act = data.get("act")
+            query = data.get("query")
 
-        response = {"section": "",
-                    "title": "",
-                    "description": ""}
-        if act == 'bns':
-            if BNS.objects.filter(section_id=query).exists():
-                record = BNS.objects.get(section_id=query)
-                response["section"] = query
-                response["title"] = record.section_title
-                response["description"] = record.description
+            # Validate inputs
+            if not act or not query:
+                return JsonResponse({"error": "Both 'act' and 'query' are required."}, status=400)
 
-            elif BNS.objects.filter(section_title=query).exists():
-                record = BNS.objects.get(section_title=query)
-                response["title"] = query
-                response["section"] = record.section_id
-                response["description"] = record.description
-            else:
-                return JsonResponse({"error": "Enter valid query"})
+            # Get the model for the selected act
+            model = ACT_MODELS.get(act)
+            if not model:
+                return JsonResponse({"error": "Invalid 'act' provided."}, status=400)
 
-        elif act == 'ipc':
-            if IPC.objects.filter(section_id=query).exists():
-                record = IPC.objects.get(section_id=query)
-                response["section"] = query
-                response["title"] = record.section_title
-                response["description"] = record.description
+            # Search for the record
+            record = model.objects.filter(section_id=query).first() or \
+                     model.objects.filter(section_title=query).first()
 
-            elif IPC.objects.filter(section_title=query).exists():
-                record = IPC.objects.get(section_title=query)
-                response["title"] = query
-                response["section"] = record.section_id
-                response["description"] = record.description
-            else:
-                return JsonResponse({"error": "Enter valid query"})
+            if not record:
+                return JsonResponse({"error": "No matching record found."}, status=404)
 
-        elif act == 'crpc':
-            if CrPC.objects.filter(section_id=query).exists():
-                record = CrPC.objects.get(section_id=query)
-                response["section"] = query
-                response["title"] = record.section_title
-                response["description"] = record.description
+            # Build the response
+            response = {
+                "section": getattr(record, "section_id", ""),
+                "title": getattr(record, "section_title", ""),
+                "description": getattr(record, "description", ""),
+            }
+            return JsonResponse({"data": response}, status=200)
 
-            elif CrPC.objects.filter(section_title=query).exists():
-                record = CrPC.objects.get(section_title=query)
-                response["title"] = query
-                response["section"] = record.section_id
-                response["description"] = record.description
-            else:
-                return JsonResponse({"error": "Enter valid query"})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format."}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": f"Internal server error: {str(e)}"}, status=500)
 
-        elif act == 'iea':
-            if IEA.objects.filter(section_id=query).exists():
-                record = IEA.objects.get(section_id=query)
-                response["section"] = query
-                response["title"] = record.section_title
-                response["description"] = record.description
+    return JsonResponse({"error": "Invalid Request Method"}, status=405)
 
-            elif IEA.objects.filter(section_title=query).exists():
-                record = IEA.objects.get(section_title=query)
-                response["title"] = query
-                response["section"] = record.section_id
-                response["description"] = record.description
-            else:
-                return JsonResponse({"error": "Enter valid query"})
 
-        elif act == 'cpc':
-            if CPC.objects.filter(section_id=query).exists():
-                record = CPC.objects.get(section_id=query)
-                response["section"] = query
-                response["title"] = record.section_title
-                response["description"] = record.description
+def database(request):
 
-            elif CPC.objects.filter(section_title=query).exists():
-                record = CPC.objects.get(section_title=query)
-                response["title"] = query
-                response["section"] = record.section_id
-                response["description"] = record.description
-            else:
-                return JsonResponse({"error": "Enter valid query"})
-
-        elif act == 'mva':
-            if MVA.objects.filter(section_id=query).exists():
-                record = MVA.objects.get(section_id=query)
-                response["section"] = query
-                response["title"] = record.section_title
-                response["description"] = record.description
-
-            elif MVA.objects.filter(section_title=query).exists():
-                record = MVA.objects.get(section_title=query)
-                response["title"] = query
-                response["section"] = record.section_id
-                response["description"] = record.description
-            else:
-                return JsonResponse({"error": "Enter valid query"})
-        return JsonResponse(response, status=200)
-    return JsonResponse({"error": "Invalid Request Method"})
-
-def data(request):
-    '''url = os.getenv("link")
+    #websrcap
+    """
+    url = os.getenv("link")
     scrapping = WebScrapping(url)
     section_detail = scrapping.scrap()
     for section in section_detail:
@@ -172,9 +112,33 @@ def data(request):
 
     #print(section_detail)
 
-    
-    return HttpResponse(f"i am a chill guy!\n\t Added -> {section_no} - {section_title}")'''
+    return HttpResponse(f"i am a chill guy!\n\t Added -> {section_no} - {section_title}")
+    """
     data = BNS.objects.values()
     data_list = list(data)
-    return JsonResponse({"response": "i am a chill guy!", "data": data_list})
+    return JsonResponse({"data": data_list})
+
+def pdf(request):
+    """with open("C:\Django projects\Space\Project_Backend\home\extra\Bns.pdf", "rb") as pdf_file:
+        binary_data = pdf_file.read()
+
+    document = Document(act_name="BNS", description="The Bharatiya Nyaya Sanhita, 2023 is a proposed legislation in India that aims to replace the Indian Penal Code, 1860. It seeks to modernize criminal laws, streamline procedures, and address contemporary challenges while upholding justice and fairness in the legal system.", pdf=binary_data)
+    document.save()"""
+    return JsonResponse("pdf save done.", safe=False)
+
+
+def serve_pdf(request, document_id):
+    try:
+        # Fetch the document from the database
+        document = Document.objects.get(id=document_id)
+
+        # Create an HTTP response with the PDF binary data
+        response = HttpResponse(document.pdf, content_type='application/pdf')
+
+        # Add content-disposition header to indicate it's a file
+        response['Content-Disposition'] = f'attachment; filename="{document.act_name}.pdf"'
+        return response
+    except Document.DoesNotExist:
+        return JsonResponse({"error": "Document not found"}, status=404)
+
 

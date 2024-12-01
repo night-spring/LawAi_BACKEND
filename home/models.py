@@ -60,3 +60,11 @@ class IEA(models.Model):
     def __str__(self):
         return f"IPC: {self.section_id} - {self.section_title} -> {self.description}..."
 
+class Document(models.Model):
+    act_name = models.TextField()
+    description = models.TextField()
+    pdf = models.BinaryField()  # Store the binary data of the PDF
+
+    def __str__(self):
+        return self.name
+
