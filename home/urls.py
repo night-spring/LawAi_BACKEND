@@ -6,6 +6,7 @@ urlpatterns = [
     path("ai/", views.ai, name = "ai"),
     path("search/", views.search_database, name = "search"),
     path("database/", views.database, name = "database"),
-    path("pdf/", views.pdf, name = "pdf"),
-    path('serve-pdf/<int:document_id>/', views.serve_pdf, name='serve_pdf'),
+    path("save_pdf/", views.save_pdf, name = "save_pdf"),
+    path('pdfs/', views.pdf_list, name='pdf_list'),
+    path('pdfs/<int:pdf_id>/download/', views.download_pdf, name='download_pdf'),
 ]

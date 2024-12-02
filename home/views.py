@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponse
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from .models import Query, BNS, IPC, CrPC, MVA, CPC, IEA, Document
 from home.webscrap import WebScrapping
 import json
@@ -118,21 +118,28 @@ def database(request):
     data_list = list(data)
     return JsonResponse({"data": data_list})
 
-def pdf(request):
-    """with open("C:\Django projects\Space\Project_Backend\home\extra\Bns.pdf", "rb") as pdf_file:
+def save_pdf(request):
+    '''with open("C:\Django projects\Space\Project_Backend\Criminal Laws/BNS.pdf", "rb") as pdf_file:
         binary_data = pdf_file.read()
 
-    document = Document(act_name="BNS", description="The Bharatiya Nyaya Sanhita, 2023 is a proposed legislation in India that aims to replace the Indian Penal Code, 1860. It seeks to modernize criminal laws, streamline procedures, and address contemporary challenges while upholding justice and fairness in the legal system.", pdf=binary_data)
-    document.save()"""
-    return JsonResponse("pdf save done.", safe=False)
+    document = Document(act_name="",
+                        description="",
+                        pdf=binary_data)
+    document.save()'''
+
+    return JsonResponse("saved", safe=False)
 
 
-def serve_pdf(request, document_id):
+def pdf_list(request):
+    # Fetch all PDFs with name and description
+    documents = Document.objects.all().values('id', 'act_name', 'description')
+    return JsonResponse(list(documents), safe=False)
+
+def download_pdf(request, pdf_id):
     try:
-        # Fetch the document from the database
-        document = Document.objects.get(id=document_id)
+        # Fetch the PDF document by ID
+        document = Document.objects.get(id=pdf_id)
 
-        # Create an HTTP response with the PDF binary data
         response = HttpResponse(document.pdf, content_type='application/pdf')
 
         # Add content-disposition header to indicate it's a file

@@ -66,5 +66,5 @@ class Document(models.Model):
     pdf = models.BinaryField()  # Store the binary data of the PDF
 
     def __str__(self):
-        return self.name
+        return self.act_name
 
