@@ -114,7 +114,42 @@ def database(request):
 
     return HttpResponse(f"i am a chill guy!\n\t Added -> {section_no} - {section_title}")
     """
+    bns = BNS.objects.values()
+    ipc = IPC.objects.values()
+    crpc = CrPC.objects.values()
+    cpc = CPC.objects.values()
+    mva = MVA.objects.values()
+    iea = IEA.objects.values()
+    data_list = list(bns) + list(ipc) + list(crpc) + list(cpc) + list(mva) + list(iea)
+    return JsonResponse({"data": data_list})
+
+def bns(request):
     data = BNS.objects.values()
+    data_list = list(data)
+    return JsonResponse({"data": data_list})
+
+def ipc(request):
+    data = IPC.objects.values()
+    data_list = list(data)
+    return JsonResponse({"data": data_list})
+
+def crpc(request):
+    data = CrPC.objects.values()
+    data_list = list(data)
+    return JsonResponse({"data": data_list})
+
+def mva(request):
+    data = MVA.objects.values()
+    data_list = list(data)
+    return JsonResponse({"data": data_list})
+
+def cpc(request):
+    data = CPC.objects.values()
+    data_list = list(data)
+    return JsonResponse({"data": data_list})
+
+def iea(request):
+    data = IEA.objects.values()
     data_list = list(data)
     return JsonResponse({"data": data_list})
 
