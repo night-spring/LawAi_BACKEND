@@ -68,3 +68,14 @@ class Document(models.Model):
     def __str__(self):
         return self.act_name
 
+class Case(models.Model):
+    caseHeading = models.TextField()
+    applicableArticle = models.TextField()
+    tags = models.TextField()
+    query = models.TextField()
+    status = models.TextField()
+    description = models.TextField()
+
+    def __str__(self):
+        return self.caseHeading
+
