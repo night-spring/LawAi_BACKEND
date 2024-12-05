@@ -159,7 +159,7 @@ def save_pdf(request):
 
 def pdf_list(request):
     # Fetch all PDFs with name and description
-    documents = Document.objects.all().values('id', 'act_name', 'description')
+    documents = Document.objects.values('id', 'act_name', 'description').order_by('id')
     return JsonResponse(list(documents), safe=False)
 
 def download_pdf(request, pdf_id):
@@ -218,4 +218,33 @@ def case_list(request):
         return JsonResponse({"cases": cases_list}, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+
+def case_update(request, case_id):
+    try:
+        case = Case.objects.get(id=case_id)
+        data = json.loads(request.body)
+
+        case.caseHeading = data.get('caseHeading')
+        case.applicableArticle = data.get('applicableArticle')
+        case.tags = data.get('tags')
+        case.query = data.get('query')
+        case.status = data.get('status')
+        case.description = data.get('description')
+        case.save()
+
+        return JsonResponse({"message": "Case saved successfully!", "case": {
+            "id": case.id,
+            "caseHeading": case.caseHeading,
+            "applicableArticle": case.applicableArticle,
+            "tags": case.tags,
+            "query": case.query,
+            "status": case.status,
+            "description": case.description,
+        }}, status=201)
+
+    except Case.DoesNotExist:
+        return JsonResponse({"error": "Case not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
 
