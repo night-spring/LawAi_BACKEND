@@ -15,5 +15,4 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Project_Backend.settings")
 
 application = get_wsgi_application()
 
-app = application
 
