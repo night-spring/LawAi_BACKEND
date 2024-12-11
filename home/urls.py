@@ -5,6 +5,8 @@ urlpatterns = [
     path("", views.home, name = "home"),
 
     # AI
+    path("encode/", views.encode, name = "encode"),
+    path("decode/", views.decode, name = "decode"),
     path("ai/", views.ai, name = "ai"),
     path("save_response/", views.save_response, name = "save_response"),
 
