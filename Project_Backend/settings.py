@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-^f^k!u6#!0!7szp)(!4ic%066vadb3r*&33vid)(5l#18(6lh2
 DEBUG = True
 
 ALLOWED_HOSTS = ["sih-backend-881i.onrender.com", "localhost"]
-
+port = 8000
 
 # Application definition
 
