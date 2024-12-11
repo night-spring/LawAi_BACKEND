@@ -36,84 +36,9 @@ nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('stopwords')
 
-class AI:
-    def __init__(self, text=None):
-        self.crime_code_dic = {
-            "murder": 0,
-            "culpable homicide": 1,
-            "decoity": 2,
-            "kidnapping": 3,
-            "robbery": 4,
-            "bribery": 5,
-            "theft": 6,
-            "alcohol": 7,
-            "criminal intimidation": 8
-        }
-        self.acts = {
-            "murder": ["100", "103"],
-            "culpable homicide": ["299", "304"],
-            "decoity": ["391", "395"],
-            "kidnapping": ["359", "363"],
-            "robbery": ["390", "392"],
-            "bribery": ["171B", "171E"],
-            "theft": ["378", "379"],
-            "alcohol": ["510", ""],
-            "criminal intimidation": ["503", "506"],
-        }
-
-    def encode(self, text):
-        try:
-            # Tokenize and preprocess the text
-            tokens = word_tokenize(text)
-            stop_words = set(stopwords.words('english'))
-            filtered_tokens = [token.lower() for token in tokens if token.lower() not in stop_words]
-            refined_tokens = [token for token in filtered_tokens if token not in string.punctuation]
-            final_tokens = [token for token in refined_tokens if token.isalnum()]
-
-            # Lemmatize tokens
-            lemmatizer = WordNetLemmatizer()
-            lemmatized_tokens = [lemmatizer.lemmatize(token) for token in final_tokens]
-
-            # Generate crime code
-            crime_code = ""
-            for token in lemmatized_tokens:
-                if token in self.crime_code_dic:
-                    crime_code += str(self.crime_code_dic[token])
-
-            return crime_code
-
-        except Exception as e:
-            return {"error": str(e)}
-
-    def decode(self, crime_code):
-        try:
-            # Decode crime code to acts
-            decoded_data = []
-            for code in crime_code:
-                index = int(code)
-                crime = list(self.crime_code_dic.keys())[index]
-                acts = self.acts[crime]
-                description = acts[0]
-                punishment = acts[1]
-                decoded_data.append((description, punishment))
-            return decoded_data
-
-        except Exception as e:
-            return {"error": str(e)}
-
-# Test function
-def test(request):
-    ai = AI()
-    crime_code = ai.encode("I was kidnapped by the criminals")
-    decoded_data = ai.decode(crime_code)
-
-    return JsonResponse({
-        "crime_code": crime_code,
-        "decoded_data": decoded_data
-    }, safe=False)
 
 @csrf_exempt
-def Encode(request):
+def encode(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
