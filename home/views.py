@@ -71,7 +71,6 @@ def encode(request):
             for token in lemmatized_tokens:
                 if token in crime_code_dic:
                     crime_code += str(crime_code_dic[token])
-            print(crime_code)
 
             return JsonResponse({"crime_code": crime_code}, safe=False)
 
@@ -121,7 +120,6 @@ def decode(request):
                     act.append(description)
                 if punishment:
                     act.append(punishment)
-            print(act)
             return JsonResponse({"acts": act}, safe=False)
 
         except Exception as e:
