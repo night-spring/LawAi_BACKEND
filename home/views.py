@@ -113,17 +113,49 @@ def test(request):
     }, safe=False)
 
 @csrf_exempt
-def encode(request):
+def Encode(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             query = data["query"]
-            ai = AI()
-            crime_code = ai.encode(query)
+
+            # Tokenize and preprocess the text
+            crime_code_dic = {
+                "murder": 0,
+                "culpable homicide": 1,
+                "decoity": 2,
+                "kidnapping": 3,
+                "robbery": 4,
+                "bribery": 5,
+                "theft": 6,
+                "alcohol": 7,
+                "criminal intimidation": 8
+            }
+            tokens = word_tokenize(query)
+            stop_words = set(stopwords.words('english'))
+            filtered_tokens = [token.lower() for token in tokens if token.lower() not in stop_words]
+            refined_tokens = [token for token in filtered_tokens if token not in string.punctuation]
+            final_tokens = [token for token in refined_tokens if token.isalnum()]
+
+            # Lemmatize tokens
+            lemmatizer = WordNetLemmatizer()
+            lemmatized_tokens = [lemmatizer.lemmatize(token) for token in final_tokens]
+
+            # Generate crime code
+            crime_code = ""
+            for token in lemmatized_tokens:
+                if token in crime_code_dic:
+                    crime_code += str(crime_code_dic[token])
 
             return JsonResponse({"crime_code": crime_code}, safe=False)
+
+
         except Exception as e:
             return JsonResponse({"error": str(e)})
+
+    else:
+        return JsonResponse("test", safe=False)
+
 
 @csrf_exempt
 def decode(request):
@@ -131,17 +163,45 @@ def decode(request):
         try:
             data = json.loads(request.body)
             crime_code = data["crime_code"]
-            ai = AI()
-            acts = ai.decode(crime_code)
-            description_act = acts[0]
-            punishment = acts[1]
-            all_acts = description_act + punishment
-            return JsonResponse({"acts": all_acts}, safe=False)
+            # Decode crime code to acts
+            crime_code_dic = {
+                "murder": 0,
+                "culpable homicide": 1,
+                "decoity": 2,
+                "kidnapping": 3,
+                "robbery": 4,
+                "bribery": 5,
+                "theft": 6,
+                "alcohol": 7,
+                "criminal intimidation": 8
+            }
+            acts = {
+                "murder": ["100", "103"],
+                "culpable homicide": ["299", "304"],
+                "decoity": ["391", "395"],
+                "kidnapping": ["359", "363"],
+                "robbery": ["390", "392"],
+                "bribery": ["171B", "171E"],
+                "theft": ["378", "379"],
+                "alcohol": ["510", ""],
+                "criminal intimidation": ["503", "506"],
+            }
+            act = []
+            for code in crime_code:
+                index = int(code)
+                crime = list(crime_code_dic.keys())[index]
+                description, punishment = acts[crime]
+                if description:
+                    act.append(description)
+                if punishment:
+                    act.append(punishment)
+            return JsonResponse({"acts": act}, safe=False)
+
         except Exception as e:
             return JsonResponse({"error": str(e)})
     else:
         return JsonResponse({"error": "Method not allowed"})
-    
+
 
 #  AI
 @csrf_exempt
