@@ -31,7 +31,11 @@ ACT_MODELS = {
 }
 
 # Download required NLTK data
-nltk.data.path.append('./nltk_data')
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+nltk.download('stopwords')
+nltk.download('punkt_tab')
 
 
 @csrf_exempt
