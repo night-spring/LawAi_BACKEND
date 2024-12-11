@@ -132,48 +132,6 @@ def decode(request):
         return JsonResponse({"error": "Method not allowed"})
 
 
-#  AI
-@csrf_exempt
-def ai(request):
-    if request.method == 'POST':
-        try:
-            # Get the query from the request
-            data = json.loads(request.body)
-            query = data['query']
-            prompt = os.getenv('prompt')
-            text = f"{query}. {prompt}"
-            # Generate response using the query
-            API_KEY = os.getenv("API_KEY")
-            if not API_KEY:
-                raise ValueError("API_KEY is not set. Please set it in your .env file.")
-            genai.configure(api_key=API_KEY)
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content(text)
-
-            return JsonResponse({"response": response.text})
-        except Exception as e:
-            return JsonResponse({"error": str(e)})
-    else:
-        return JsonResponse({"error": "Invalid Request Method"})
-
-@csrf_exempt
-def save_response(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            query = data['query']
-            response = data['response']
-
-            # Save the query and response to the database
-            Query.objects.create(query=query, response=response)
-
-            return JsonResponse({"message": "Response saved successfully"})
-        except Exception as e:
-            return JsonResponse({"error": str(e)})
-    else:
-        return JsonResponse({"error": "Invalid Request Method"})
-
-
 # Bare Acts
 @csrf_exempt  # Remove this for production, use proper CSRF handling
 def search_database(request):
