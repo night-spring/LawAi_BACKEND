@@ -25,6 +25,8 @@ ACT_MODELS = {
     "cpc": CPC,
     "mva": MVA,
 }
+
+#  AI
 @csrf_exempt
 def ai(request):
     if request.method == 'POST':
@@ -66,6 +68,7 @@ def save_response(request):
         return JsonResponse({"error": "Invalid Request Method"})
 
 
+# Bare Acts
 @csrf_exempt  # Remove this for production, use proper CSRF handling
 def search_database(request):
     if request.method == 'POST':
@@ -114,36 +117,26 @@ def search_database(request):
 
 
 def database(request):
+    data_list = {}
 
-    #websrcap
-    """
-    url = os.getenv("link")
-    scrapping = WebScrapping(url)
-    section_detail = scrapping.scrap()
-    for section in section_detail:
-        #print(section)
-        description = section_detail[section]
-        match = re.match(r"Section (\d+[A-Za-z]*)\s*[\u2013\u2014-]\s*(.+)", section)
-        #print(match)
-        section_no = match.group(1)
-        section_title = match.group(2).strip()
-        print(section_no, section_title)
-        if not IEA.objects.filter(section_id=section_no).exists():
-            IEA(section_id=section_no, section_title=section_title, description=description).save()
-
-    #print(section_detail)
-
-    return HttpResponse(f"i am a chill guy!\n\t Added -> {section_no} - {section_title}")
-    """
     bns = BNS.objects.values()
+    data_list['bns'] = list(bns)
     ipc = IPC.objects.values()
+    data_list['ipc'] = list(ipc)
     crpc = CrPC.objects.values()
+    data_list['crpc'] = list(crpc)
     cpc = CPC.objects.values()
+    data_list['cpc'] = list(cpc)
     mva = MVA.objects.values()
+    data_list['mva'] = list(mva)
     iea = IEA.objects.values()
-    data_list = list(bns) + list(ipc) + list(crpc) + list(cpc) + list(mva) + list(iea)
+    data_list['iea'] = list(iea)
+
+    data_list = list(data_list)
     return JsonResponse({"data": data_list})
 
+
+# PDFs
 def save_pdf(request):
     """
     with open("", "rb") as pdf_file:
@@ -175,6 +168,8 @@ def download_pdf(request, pdf_id):
     except Document.DoesNotExist:
         return JsonResponse({"error": "Document not found"}, status=404)
 
+
+# Cases
 @csrf_exempt
 def case_save(request):
     if request.method == "POST":
