@@ -1,7 +1,6 @@
 from django.shortcuts import render, HttpResponse
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
 from django.http import JsonResponse, FileResponse
 from .models import Query, BNS, IPC, CrPC, MVA, CPC, IEA, Document, Case
 from home.webscrap import WebScrapping
