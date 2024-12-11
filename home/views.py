@@ -31,15 +31,13 @@ ACT_MODELS = {
     "mva": MVA,
 }
 
-
-# Download required NLTK data once
+# Download required NLTK data
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('stopwords')
 
-
 class AI:
-    def __init__(self, text):
+    def __init__(self, text=None):
         self.crime_code_dic = {
             "murder": 0,
             "culpable homicide": 1,
@@ -65,7 +63,6 @@ class AI:
 
     def encode(self, text):
         try:
-
             # Tokenize and preprocess the text
             tokens = word_tokenize(text)
             stop_words = set(stopwords.words('english'))
@@ -104,11 +101,10 @@ class AI:
         except Exception as e:
             return {"error": str(e)}
 
-
 # Test function
 def test(request):
     ai = AI()
-    crime_code = ai.encode()
+    crime_code = ai.encode("I was kidnapped by the criminals")
     decoded_data = ai.decode(crime_code)
 
     return JsonResponse({
@@ -126,8 +122,6 @@ def encode(request):
             crime_code = ai.encode(query)
 
             return JsonResponse({"crime_code": crime_code}, safe=False)
-
-
         except Exception as e:
             return JsonResponse({"error": str(e)})
 
@@ -143,7 +137,6 @@ def decode(request):
             punishment = acts[1]
             all_acts = description_act + punishment
             return JsonResponse({"acts": all_acts}, safe=False)
-
         except Exception as e:
             return JsonResponse({"error": str(e)})
     else:
