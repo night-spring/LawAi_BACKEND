@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-^f^k!u6#!0!7szp)(!4ic%066vadb3r*&33vid)(5l#18(6lh2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["sih-backend-881i.onrender.com", "0.0.0.0:8000"]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -50,7 +50,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'corsheaders.middleware.CorsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True

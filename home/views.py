@@ -57,6 +57,18 @@ def encode(request):
                 "alcohol": 7,
                 "criminal intimidation": 8
             }
+            acts = {
+                "murder": ["100", "103"],
+                "culpable homicide": ["299", "304"],
+                "decoity": ["391", "395"],
+                "kidnapping": ["359", "363"],
+                "robbery": ["390", "392"],
+                "bribery": ["171B", "171E"],
+                "theft": ["378", "379"],
+                "alcohol": ["510", ""],
+                "criminal intimidation": ["503", "506"],
+            }
+
             tokens = word_tokenize(query)
             stop_words = set(stopwords.words('english'))
             filtered_tokens = [token.lower() for token in tokens if token.lower() not in stop_words]
@@ -77,7 +89,18 @@ def encode(request):
                     crime_code += str(crime_code_dic[token])
             print(crime_code)
 
-            return JsonResponse({"crime_code": crime_code}, safe=False)
+            act = []
+            for code in crime_code:
+                index = int(code)
+                crime = list(crime_code_dic.keys())[index]
+                description, punishment = acts[crime]
+                if description:
+                    act.append(description)
+                if punishment:
+                    act.append(punishment)
+            print(act)
+
+            return JsonResponse({"acts": act}, safe=False)
 
 
         except Exception as e:

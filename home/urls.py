@@ -7,8 +7,7 @@ urlpatterns = [
     # AI
     path("encode/", views.encode, name = "encode"),
     path("decode/", views.decode, name = "decode"),
-    path("ai/", views.ai, name = "ai"),
-    path("save_response/", views.save_response, name = "save_response"),
+    #path("save_response/", views.save_response, name = "save_response"),
 
     # Bare Acts
     path("search/", views.search_database, name = "search"),
