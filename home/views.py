@@ -88,6 +88,10 @@ def encode(request):
                     lemmatized_tokens[lemitized_token] = "alcohol"
                 if lemmatized_tokens[lemitized_token] == "bribe":
                     lemmatized_tokens[lemitized_token] = "briberi"
+                if lemmatized_tokens[lemitized_token] == "stole":
+                    lemmatized_tokens[lemitized_token] = "theft"
+                if lemmatized_tokens[lemitized_token] == "steal":
+                    lemmatized_tokens[lemitized_token] = "theft"
 
             # Generate crime code
             crime_code = ""
