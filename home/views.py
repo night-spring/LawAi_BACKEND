@@ -99,17 +99,17 @@ def encode(request):
             #print(crime_code)
 
             # model check
-            def model(query):
-                with open("NNM.pkl", "rb") as f:
-                    model = pickle.load(f)
-                with open("tfidf_vectorizer.pkl", "rb") as f:
-                    tfidf = pickle.load(f)
-                queries_tfidf = tfidf.transform([query]).toarray()
-                predictions = model.predict(queries_tfidf)
-                predicted_categories = np.argmax(predictions, axis=1)
-                return predicted_categories
             
-            predicted_categories = str(model(query)[0])
+
+            with open("NNM.pkl", "rb") as f:
+                model = pickle.load(f)
+            with open("tfidf_vectorizer.pkl", "rb") as f:
+                tfidf = pickle.load(f)
+            queries_tfidf = tfidf.transform([query]).toarray()
+            predictions = model.predict(queries_tfidf)
+            predicted_categories = np.argmax(predictions, axis=1)
+            
+            predicted_categories = str(predicted_categories)[0]
             if predicted_categories not in crime_code:
                 crime_code += predicted_categories
 
