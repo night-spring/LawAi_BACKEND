@@ -58,7 +58,7 @@ def encode(request):
                 "criminal intimidation": 8
             }
             acts = {
-                "murder": ["100", "103"],
+                "murder": ["300", "302"],
                 "culpable homicide": ["299", "304"],
                 "decoity": ["391", "395"],
                 "kidnapping": ["359", "363"],
@@ -81,13 +81,16 @@ def encode(request):
             # Lemmatize tokens
             lemmatizer = WordNetLemmatizer()
             lemmatized_tokens = [lemmatizer.lemmatize(token) for token in stemmed_tokens]
+            for lemitized_token in range(len(lemmatized_tokens)):
+                if lemmatized_tokens[lemitized_token] == "kill":
+                    lemmatized_tokens[lemitized_token] = "murder"
 
             # Generate crime code
             crime_code = ""
             for token in lemmatized_tokens:
                 if token in crime_code_dic:
                     crime_code += str(crime_code_dic[token])
-            print(crime_code)
+            #print(crime_code)
 
             act = []
             for code in crime_code:
@@ -98,9 +101,17 @@ def encode(request):
                     act.append(description)
                 if punishment:
                     act.append(punishment)
-            print(act)
+            #print(act)
 
-            return JsonResponse({"acts": act}, safe=False)
+            act_database = {}
+            for i in act:
+                description = IPC.objects.filter(section_id=i).first()
+                if description:  # Check if an object exists
+                    act_database[i] = description.description
+                else:
+                    print(f"Section ID {i} not found in database.")
+            #print(act_database)
+            return JsonResponse({"acts": act_database}, safe=False)
 
 
         except Exception as e:
@@ -126,9 +137,11 @@ def decode(request):
                 "bribery": 5,
                 "theft": 6,
                 "alcohol": 7,
-                "criminal intimidation": 8
+                "criminal intimidation": 8,
+                "kill": 9
             }
             acts = {
+                "kill": ["300", "302"],
                 "murder": ["300", "302"],
                 "culpable homicide": ["299", "304"],
                 "decoity": ["391", "395"],
