@@ -50,9 +50,9 @@ def encode(request):
                 "murder": 0,
                 "culpable homicide": 1,
                 "decoity": 2,
-                "kidnapping": 3,
-                "robbery": 4,
-                "bribery": 5,
+                "kidnap": 3,
+                "robberi": 4,
+                "briberi": 5,
                 "theft": 6,
                 "alcohol": 7,
                 "criminal intimidation": 8
@@ -61,9 +61,9 @@ def encode(request):
                 "murder": ["300", "302"],
                 "culpable homicide": ["299", "304"],
                 "decoity": ["391", "395"],
-                "kidnapping": ["359", "363"],
-                "robbery": ["390", "392"],
-                "bribery": ["171B", "171E"],
+                "kidnap": ["359", "363"],
+                "robberi": ["390", "392"],
+                "briberi": ["171B", "171E"],
                 "theft": ["378", "379"],
                 "alcohol": ["510", ""],
                 "criminal intimidation": ["503", "506"],
@@ -84,6 +84,10 @@ def encode(request):
             for lemitized_token in range(len(lemmatized_tokens)):
                 if lemmatized_tokens[lemitized_token] == "kill":
                     lemmatized_tokens[lemitized_token] = "murder"
+                if lemmatized_tokens[lemitized_token] == "drunk":
+                    lemmatized_tokens[lemitized_token] = "alcohol"
+                if lemmatized_tokens[lemitized_token] == "bribe":
+                    lemmatized_tokens[lemitized_token] = "briberi"
 
             # Generate crime code
             crime_code = ""
