@@ -65,7 +65,7 @@ def encode(request):
 
             stemmer = PorterStemmer()
             stemmed_tokens = [stemmer.stem(token) for token in final_tokens]
-            print("Stemmed Tokens:", stemmed_tokens)
+            #print("Stemmed Tokens:", stemmed_tokens)
             # Lemmatize tokens
             lemmatizer = WordNetLemmatizer()
             lemmatized_tokens = [lemmatizer.lemmatize(token) for token in stemmed_tokens]
@@ -75,6 +75,7 @@ def encode(request):
             for token in lemmatized_tokens:
                 if token in crime_code_dic:
                     crime_code += str(crime_code_dic[token])
+            print(crime_code)
 
             return JsonResponse({"crime_code": crime_code}, safe=False)
 
@@ -105,7 +106,7 @@ def decode(request):
                 "criminal intimidation": 8
             }
             acts = {
-                "murder": ["100", "103"],
+                "murder": ["300", "302"],
                 "culpable homicide": ["299", "304"],
                 "decoity": ["391", "395"],
                 "kidnapping": ["359", "363"],
@@ -124,7 +125,9 @@ def decode(request):
                     act.append(description)
                 if punishment:
                     act.append(punishment)
+            print(act)
             return JsonResponse({"acts": act}, safe=False)
+
 
         except Exception as e:
             return JsonResponse({"error": str(e)})
