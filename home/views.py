@@ -14,8 +14,6 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import string
 from nltk.stem import PorterStemmer
-import pickle
-import numpy as np
 
 load_dotenv()
 
@@ -98,22 +96,6 @@ def encode(request):
                     crime_code += str(crime_code_dic[token])
             #print(crime_code)
 
-            # model check
-            
-
-            with open("NNM.pkl", "rb") as f:
-                model = pickle.load(f)
-            with open("tfidf_vectorizer.pkl", "rb") as f:
-                tfidf = pickle.load(f)
-            queries_tfidf = tfidf.transform([query]).toarray()
-            predictions = model.predict(queries_tfidf)
-            predicted_categories = np.argmax(predictions, axis=1)
-            
-            predicted_categories = str(predicted_categories)[0]
-            if predicted_categories not in crime_code:
-                crime_code += predicted_categories
-
-            # Decode crime code to acts
             act = []
             for code in crime_code:
                 index = int(code)
